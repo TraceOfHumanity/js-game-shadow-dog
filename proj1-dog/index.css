@@ -1,9 +1,26 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+  gap: 20px;
+}
+
 #canvas {
   border: 5px solid black;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   width: 600px;
   height: 600px;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
 }
