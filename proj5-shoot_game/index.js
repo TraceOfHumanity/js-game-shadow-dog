@@ -2,6 +2,12 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const CANVAS_WIDTH = (canvas.width = window.innerWidth);
 const CANVAS_HEIGHT = (canvas.height = window.innerHeight);
+const collisionCanvas = document.getElementById("collisionCanvas");
+const collisionCtx = collisionCanvas.getContext("2d");
+const COLLISION_CANVAS_WIDTH = (collisionCanvas.width = window.innerWidth);
+const COLLISION_CANVAS_HEIGHT = (collisionCanvas.height = window.innerHeight);
+
+let score = 0;
 
 let timeToNextRaven = 0;
 let ravenInterval = 500;
@@ -29,6 +35,9 @@ class Raven {
     this.flapInterval = Math.random() * 50 + 50;
   }
   update(deltaTime) {
+    if (this.y < 0 || this.y > CANVAS_HEIGHT - this.height) {
+      this.directionY = this.directionY * -1;
+    }
     this.x -= this.directionX;
     this.y += this.directionY;
     if (this.x < 0 - this.width) {
@@ -59,7 +68,81 @@ class Raven {
   }
 }
 
-const raven = new Raven();
+const explosions = [];
+
+class Explosion {
+  constructor(x, y) {
+    this.spriteWidth = 200;
+    this.spriteHeight = 179;
+    this.width = this.spriteWidth * 0.7;
+    this.height = this.spriteHeight * 0.7;
+    this.x = x - this.width / 2;
+    this.y = y - this.height / 2;
+    this.image = new Image();
+    this.image.src = "./boom.png";
+    this.frame = 0;
+    this.timer = 0;
+    this.sound = new Audio();
+    this.sound.src = "./Fire impact 1.wav";
+  }
+  update() {
+    if (this.frame === 0) {
+      this.sound.play();
+    }
+    this.timer++;
+    if (this.timer % 10 === 0) {
+      this.frame++;
+    }
+  }
+  draw() {
+    ctx.drawImage(
+      this.image,
+      this.frame * this.spriteWidth,
+      0,
+      this.spriteWidth,
+      this.spriteHeight,
+      this.x,
+      this.y,
+      this.width,
+      this.height
+    );
+  }
+}
+
+window.addEventListener("click", function (e) {
+  createAnimation(e);
+});
+
+function createAnimation(e) {
+  let positionX = e.x;
+  let positionY = e.y;
+  explosions.push(new Explosion(positionX, positionY));
+}
+
+function drawScore() {
+  ctx.font = "24px Arial";
+  ctx.fillStyle = "black";
+  ctx.fillText("Score: " + score, 13, 53);
+  ctx.fillStyle = "white";
+  ctx.fillText("Score: " + score, 10, 50);
+}
+
+canvas.addEventListener("click", (event) => {
+  const mouseX = event.clientX;
+  const mouseY = event.clientY;
+
+  ravens.forEach((object, index) => {
+    if (
+      mouseX > object.x &&
+      mouseX < object.x + object.width &&
+      mouseY > object.y &&
+      mouseY < object.y + object.height
+    ) {
+      ravens.splice(index, 1);
+      score++;
+    }
+  });
+});
 
 function animate(timestamp) {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -73,9 +156,21 @@ function animate(timestamp) {
     console.log(ravens);
   }
 
+  drawScore();
+
   [...ravens].forEach((object) => object.update(deltaTime));
   [...ravens].forEach((object) => object.draw());
   ravens = ravens.filter((object) => !object.markedForDeletion);
+
+  collisionCtx.clearRect(0, 0, COLLISION_CANVAS_WIDTH, COLLISION_CANVAS_HEIGHT);
+  for (let i = 0; i < explosions.length; i++) {
+    explosions[i].update();
+    explosions[i].draw();
+    if (explosions[i].frame > 5) {
+      explosions.splice(i, 1);
+      i--;
+    }
+  }
 
   requestAnimationFrame(animate);
 }
