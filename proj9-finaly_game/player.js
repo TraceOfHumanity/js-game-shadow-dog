@@ -23,6 +23,7 @@ export default class Player {
     this.currentState.enter();
   }
   update(input, deltaTime) {
+    this.checkCollision();
     this.currentState.handleInput(input);
     this.x += this.speed;
     if (input.includes("ArrowRight")) this.speed = this.maxSpeed;
@@ -34,9 +35,6 @@ export default class Player {
     this.y += this.vy;
     if (!this.onGround()) this.vy += this.weight;
     else this.vy = 0;
-
-    // if (this.frameX < this.maxFrame) this.frameX++;
-    // else this.frameX = 0;
     if (this.frameTimer > this.frameInterval) {
       this.frameTimer = 0;
       if (this.frameX < this.maxFrame) this.frameX++;
@@ -46,6 +44,7 @@ export default class Player {
     }
   }
   draw(context) {
+    if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
     context.drawImage(
       this.image,
       this.frameX * this.width,
@@ -67,5 +66,18 @@ export default class Player {
     this.currentState = this.states[state];
     this.game.speed = this.game.maxSpeed * speed;
     this.currentState.enter();
+  }
+  checkCollision() {
+    this.game.enemies.forEach((enemy) => {
+      if (
+        enemy.x < this.x + this.width &&
+        enemy.x + enemy.width > this.x &&
+        enemy.y < this.y + this.height &&
+        enemy.y + enemy.height > this.y
+      ) {
+        enemy.markerForDeletion = true;
+        this.game.score++;
+      }
+    });
   }
 }
