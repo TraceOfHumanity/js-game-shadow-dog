@@ -68,9 +68,7 @@ export class GroundEnemy extends Enemy {
     this.speedY = 0;
     this.maxFrame = 1;
   }
-  update() {}
 }
 export class ClimbingEnemy extends Enemy {
   constructor(game) {}
-  update() {}
 }
