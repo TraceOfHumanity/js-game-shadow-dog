@@ -3,6 +3,7 @@ import InputHandler from "./input.js";
 import { Background } from "./background.js";
 import { FlyingEnemy, GroundEnemy, ClimbingEnemy } from "./enemies.js";
 import { UI } from "./UI.js";
+
 window.addEventListener("load", function () {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
@@ -22,10 +23,11 @@ window.addEventListener("load", function () {
       this.UI = new UI(this);
       this.enemies = [];
       this.particles = [];
-      this.maxParticles = 50;
+      this.collisions = [];
+      this.maxParticles = 100;
       this.enemyTimer = 0;
       this.enemyInterval = 1000;
-      this.debug = true;
+      this.debug = false;
       this.score = 0;
       this.fontColor = "black";
       this.player.currentState = this.player.states[0];
@@ -47,25 +49,34 @@ window.addEventListener("load", function () {
 
       this.particles.forEach((particle, index) => {
         particle.update();
-        if (particle.markerForDeletion) this.particles.splice(index, 1);
+        if (particle.markedForDeletion) this.particles.splice(index, 1);
       });
       if (this.particles.length > this.maxParticles) this.particles = this.particles.slice(0, this.maxParticles);
-      console.log(this.particles);
+      this.collisions.forEach((collision, index) => {
+        collision.update(deltaTime);
+
+        if (collision.markedForDeletion) this.collisions.splice(index, 1);
+      });
     }
+
     draw(context) {
       this.background.draw(context);
       this.player.draw(context);
       this.enemies.forEach((enemy) => {
         enemy.draw(context);
-        if (enemy.markerForDeletion) {
+        if (enemy.markedForDeletion) {
           this.enemies.splice(this.enemies.indexOf(enemy), 1);
         }
       });
       this.particles.forEach((particle) => {
         particle.draw(context);
       });
+      this.collisions.forEach((collision) => {
+        collision.draw(context);
+      });
       this.UI.draw(context);
     }
+
     addEnemy() {
       if (this.speed > 0 && Math.random() < 0.5) this.enemies.push(new GroundEnemy(this));
       else if (this.speed > 0) this.enemies.push(new ClimbingEnemy(this));

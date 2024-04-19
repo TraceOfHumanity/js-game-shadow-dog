@@ -5,7 +5,7 @@ class Enemy {
     this.fps = 20;
     this.frameInterval = 1000 / this.fps;
     this.frameTimer = 0;
-    this.markerForDeletion = false;
+    this.markedForDeletion = false;
   }
   update(deltaTime) {
     this.x -= this.speedX + this.game.speed;
@@ -17,7 +17,7 @@ class Enemy {
     } else {
       this.frameTimer += deltaTime;
     }
-    if (this.x + this.width < 0) this.markerForDeletion = true;
+    if (this.x + this.width < 0) this.markedForDeletion = true;
   }
   draw(context) {
     if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
@@ -86,7 +86,7 @@ export class ClimbingEnemy extends Enemy {
   update(deltaTime) {
     super.update(deltaTime);
     if (this.y > this.game.height - this.height - this.game.groundMargin) this.speedY *= -1;
-    if (this.y < -this.height) this.markerForDeletion = true;
+    if (this.y < -this.height) this.markedForDeletion = true;
   }
   draw(context) {
     super.draw(context);

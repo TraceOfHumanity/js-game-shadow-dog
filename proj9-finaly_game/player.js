@@ -1,4 +1,5 @@
 import { Sitting, Running, Jumping, Falling, Rolling, Diving, HIT } from "./state.js";
+import { CollisionAnimation } from "./collisionAnimations.js";
 
 export default class Player {
   constructor(game) {
@@ -85,13 +86,17 @@ export default class Player {
         enemy.y < this.y + this.height &&
         enemy.y + enemy.height > this.y
       ) {
-        enemy.markerForDeletion = true;
+        enemy.markedForDeletion = true;
+
+        this.game.collisions.push(
+          new CollisionAnimation(this.game, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5)
+        );
+
         if (this.currentState === this.states[4] || this.currentState === this.states[5]) {
           this.game.score++;
         } else {
           this.setState(6, 0);
         }
-        this.game.score++;
       }
     });
   }
